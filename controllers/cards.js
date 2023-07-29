@@ -39,7 +39,15 @@ module.exports.deleteCard = (req, res) => {
     }
     return res.status(ACCESS_ERROR_CODE).send({ message: 'Нет доступа' });
   })
-    .catch((err) => res.status(DEFAULT_ERROR_CODE).send({ message: `Произошла ошибка: ${err}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(SYNTAX_ERROR_CODE).send({ message: 'Ошибка при удалении карточки' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(SYNTAX_ERROR_CODE).send({ message: 'Ошибка при удалении карточки' });
+      }
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка при удалении карточки' });
+    });
 };
 
 module.exports.likeCard = (req, res) => {

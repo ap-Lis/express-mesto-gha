@@ -21,9 +21,7 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(SYNTAX_ERROR_CODE).send({ message: 'Ошибка при создании пользователя' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({
-        message: 'Ошибка при создании пользователя',
-      });
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка при создании пользователя' });
     });
 };
 
@@ -35,7 +33,15 @@ module.exports.getUser = (req, res) => {
       }
       return res.send(users);
     })
-    .catch((err) => res.status(DEFAULT_ERROR_CODE).send({ message: `Произошла ошибка: ${err}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(SYNTAX_ERROR_CODE).send({ message: 'Ошибка при получении пользователя' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(SYNTAX_ERROR_CODE).send({ message: 'Ошибка при получении пользователя' });
+      }
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка при получении пользователя' });
+    });
 };
 
 module.exports.updateUser = (req, res) => {
