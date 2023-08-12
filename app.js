@@ -2,8 +2,15 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
-const NOT_FOUND_ERROR_CODE = 404;
+const { errors, celebrate, Joi } = require('celebrate');
+const urlPattern = require('./utils/constants');
+const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-err');
+const {
+  createUser,
+  login,
+} = require('./controllers/users');
+const errorHandler = require('./middlewares/error-handler');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
@@ -17,20 +24,32 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64c4dcc1a308d08d90b85b56',
-  };
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().regex(urlPattern).required(),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
 
-  next();
-});
-
+app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use((req, res) => {
-  res.status(NOT_FOUND_ERROR_CODE).send({ message: 'URL не найден' });
+app.use((req, res, next) => {
+  next(new NotFoundError('URL не найден'));
 });
+
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
