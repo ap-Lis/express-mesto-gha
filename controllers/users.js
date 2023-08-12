@@ -22,7 +22,12 @@ module.exports.createUser = (req, res, next) => {
       email: req.body.email,
       password: hash,
     }))
-    .then((user) => res.status(codes.constants.HTTP_STATUS_CREATED).send({ data: user }))
+    .then((user) => res.status(codes.constants.HTTP_STATUS_CREATED).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.code === 11000) {
         next(new DuplicateKeyError('Пользователь с таким email уже зарегистрирован'));
