@@ -19,10 +19,11 @@ module.exports.createCard = (req, res, next) => {
     .then((cards) => cards.populate('owner'))
     .then((cards) => res.status(SUCCESS_CODE).send({ data: cards }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Получены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -36,10 +37,11 @@ module.exports.deleteCard = (req, res, next) => {
       return next(new AccessError('Нет доступа'));
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Получены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -52,10 +54,11 @@ module.exports.likeCard = (req, res, next) => {
       res.send({ data: cards });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Получены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -68,9 +71,10 @@ module.exports.dislikeCard = (req, res, next) => {
       res.send({ data: cards });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Получены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
